@@ -19,6 +19,7 @@ func TestCompressAndDecompress(t *testing.T) {
 	for i, test := range tests {
 		// Compress the data
 		fmt.Println("Beginning Test: ", i)
+		fmt.Println("Length of data: ", len(test))
 		compressedData, err := compress.Compress(test)
 		if err != nil {
 			t.Errorf("Error compressing data: %v", err)

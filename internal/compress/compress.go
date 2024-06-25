@@ -5,7 +5,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"huffman-compression/internal/huffman"
-	"huffman-compression/pkg/bitio/bitwriter"
+
+	"github.com/icza/bitio"
 )
 
 func Compress(data []byte) ([]byte, error) {
@@ -31,43 +32,37 @@ func Compress(data []byte) ([]byte, error) {
 	}
 
 	// create a bit writer to write the compressed data bit by bit
-	bitWriter, err := bitwriter.NewBitWriter()
-	if err != nil {
-		return nil, err
-	}
-	defer bitWriter.Close()
+	b := &bytes.Buffer{}
+	w := bitio.NewCountWriter(b)
 
 	// write the data to the bitWriter we are compressing bit by bit
-	var bitsWritten uint32
 	for _, bit := range encodedText {
 		if bit == '0' {
-			err := bitWriter.WriteBit(0)
+			err := w.WriteBool(false)
 			if err != nil {
 				fmt.Println("Error writing bit:", err)
 				return nil, err
 			}
-			bitsWritten++
 		} else {
-			err := bitWriter.WriteBit(1)
+			err := w.WriteBool(true)
 			if err != nil {
 				fmt.Println("Error writing bit:", err)
 				return nil, err
 			}
-			bitsWritten++
 
 		}
 	}
-	fmt.Println("Bits Written during compression: ", bitsWritten)
+	fmt.Println("Bits Written during compression: ", w.BitsCount)
 
 	// write the number of bits written to the buffer
-	err = binary.Write(compressed, binary.LittleEndian, &bitsWritten)
+	err = binary.Write(compressed, binary.LittleEndian, uint32(w.BitsCount))
 	if err != nil {
 		return nil, err
 	}
 
 	// write the encoded table and the compressed data to the buffer
 	compressed.Write(encodedTable)
-	compressed.Write(bitWriter.Bytes.Bytes())
+	compressed.Write(b.Bytes())
 
 	// compressed looks like this: [tableLength][bitsWritten][encodedTable][compressedData]
 	return compressed.Bytes(), nil

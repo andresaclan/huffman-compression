@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"container/heap"
 	"encoding/gob"
+
+	"github.com/icza/bitio"
 )
 
 type HuffmanNode struct {
@@ -20,6 +22,10 @@ func join(a, b *HuffmanNode) *HuffmanNode {
 		Left:  a,
 		Right: b,
 	}
+}
+
+func isLeaf(node *HuffmanNode) bool {
+	return node.Left == nil && node.Right == nil
 }
 
 type PriorityQueue []*HuffmanNode
@@ -81,6 +87,39 @@ func BuildHuffmanTree(freqTable map[rune]int) *HuffmanNode {
 	return heap.Pop(&pq).(*HuffmanNode)
 }
 
+func EncodeNode(node *HuffmanNode, w *bitio.CountWriter) {
+	if isLeaf(node) {
+		w.WriteBool(true)
+		w.WriteByte(byte(node.Char))
+	} else {
+		w.WriteBool(false)
+		EncodeNode(node.Left, w)
+		EncodeNode(node.Right, w)
+	}
+}
+
+func GetHuffmanTree(r *bitio.CountReader) *HuffmanNode {
+	if b, err := r.ReadBool(); b {
+		if err != nil {
+			panic(err)
+		}
+		value, err := r.ReadByte()
+		if err != nil {
+			panic(err)
+		}
+		return &HuffmanNode{
+			Char: rune(value),
+		}
+	} else {
+		leftChild := GetHuffmanTree(r)
+		rightChild := GetHuffmanTree(r)
+		return &HuffmanNode{
+			Left:  leftChild,
+			Right: rightChild,
+		}
+	}
+}
+
 func GenerateHuffmanCodes(root *HuffmanNode) map[rune]string {
 	codes := make(map[rune]string)
 	generateHuffmanCodesHelper(root, "", codes)
@@ -121,6 +160,26 @@ func DecodeText(text []byte, codes map[rune]string) []byte {
 		if char, ok := lookup[code]; ok {
 			decodedText = append(decodedText, byte(char))
 			code = ""
+		}
+	}
+	return decodedText
+}
+
+func DecodeTextHuffman(text []byte, freq map[rune]int) []byte {
+	root := BuildHuffmanTree(freq)
+
+	decodedText := make([]byte, 0)
+
+	node := root
+	for _, bit := range text {
+		if isLeaf(node) {
+			decodedText = append(decodedText, byte(node.Char))
+		} else if bit == '0' {
+			node = node.Left
+		} else if bit == '1' {
+			node = node.Right
+		} else {
+			panic("Invalid bit")
 		}
 	}
 	return decodedText
