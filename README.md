@@ -15,4 +15,4 @@ This project implements a text file lossless compression tool using Huffman enco
 To compress a file:
 
 ```sh
-go run cmd/compress/main.go <input file> <output file>
+go run cmd/app/main.go <action (compress or decompress)> <input file> <output file>
