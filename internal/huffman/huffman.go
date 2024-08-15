@@ -40,7 +40,7 @@ func NewHuffmanTreeFromFrequencies(frequencies [256]int) *HuffmanTree {
 // Encodes the data to the writer
 func (h *HuffmanTree) Encode(data []byte, w *bitio.CountWriter) {
 	for _, b := range data {
-		fmt.Println("Encoding byte:", b, "of length", h.huffmanLengths[b], "Code:", toBinaryString(h.huffmanCodes[b], h.huffmanLengths[b]))
+		// fmt.Println("Encoding byte:", b, "of length", h.huffmanLengths[b], "Code:", toBinaryString(h.huffmanCodes[b], h.huffmanLengths[b]))
 		w.WriteBits(uint64(h.huffmanCodes[b]), uint8(h.huffmanLengths[b]))
 	}
 

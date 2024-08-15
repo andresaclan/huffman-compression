@@ -21,16 +21,52 @@ func TestBuildFrequencyTable(t *testing.T) {
 		}
 	}
 }
+func TestGetFrequencies(t *testing.T) {
+	tests := []struct {
+		name  string
+		input []byte
+		want  [256]int
+	}{
+		{
+			name:  "empty slice",
+			input: []byte(""),
+			want:  func() [256]int { var freq [256]int; return freq }(),
+		},
+		{
+			name:  "single character",
+			input: []byte("a"),
+			want:  func() [256]int { var freq [256]int; freq['a'] = 1; return freq }(),
+		},
+		{
+			name:  "multiple characters",
+			input: []byte("banana"),
+			want:  func() [256]int { var freq [256]int; freq['b'] = 1; freq['a'] = 3; freq['n'] = 2; return freq }(),
+		},
+		{
+			name:  "characters with ASCII values",
+			input: []byte{0, 1, 255},
+			want:  func() [256]int { var freq [256]int; freq[0] = 1; freq[1] = 1; freq[255] = 1; return freq }(),
+		},
+	}
 
-func TestHuffman(t *testing.T) {
-	testString := "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-
-	freqTable := GetFrequencies([]byte(testString))
-
-	root := NewHuffmanTreeFromFrequencies(freqTable)
-
-	root.DisplayCodes()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := GetFrequencies(tt.input); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetFrequencies() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
+
+// func TestHuffman(t *testing.T) {
+// 	testString := "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+
+// 	freqTable := GetFrequencies([]byte(testString))
+
+// 	root := NewHuffmanTreeFromFrequencies(freqTable)
+
+//		root.DisplayCodes()
+//	}
 func TestBuildHuffmanTree(t *testing.T) {
 	// This test assumes the existence of a function to verify the structure of the Huffman tree
 	// Since the exact structure can vary but still be correct, this is a simplified example
