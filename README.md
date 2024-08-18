@@ -12,9 +12,5 @@ This project implements a text file lossless compression tool using Huffman enco
 
 ## Usage
 
-### Compression
-
-To compress a file:
-
 ```sh
 go run cmd/app/main.go 
