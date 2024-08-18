@@ -2,6 +2,8 @@
 
 This project implements a text file lossless compression tool using Huffman encoding in Go.
 
+![](https://github.com/andresaclan/huffman-compression/blob/main/demo.gif)
+
 ## Features
 
 - Compress text files using Huffman encoding
